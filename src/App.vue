@@ -1,14 +1,14 @@
 <script lang="ts" setup>
 import { watch } from 'vue'
-import HourlyForecastCard from './components/hourly-forecast/HourlyForecastCard.vue'
-import WeatherCard from './components/weather/WeatherCard.vue'
-import { useWeather } from './composables/useWeather'
-import { weatherService } from './services/weather.service'
+import HourlyForecastCard from '@/components/hourly-forecast/HourlyForecastCard.vue'
+import WeatherCard from '@/components/weather/WeatherCard.vue'
+import { useWeather } from '@/composables/useWeather'
+import { weatherService } from '@/services/weather.service'
+import SearchBar from '@/components/search-bar/SearchBar.vue'
+import { weatherCode } from './utils/utils'
+
 const {
   cityList,
-  coords,
-  dailwyWeather,
-  getCurrentTimeWeather,
   getWeather,
   hasCurrentWeather,
   hourlyForecast,
@@ -18,7 +18,7 @@ const {
   searchCity,
   selectedCity,
   weatherData,
-  getCurrentDateWeather,
+  dailwyWeather,
 } = useWeather()
 
 watch(searchCity, async (value) => {
@@ -45,93 +45,25 @@ watch(weatherData, (value) => {
 
 <template>
   <div
-    class="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-6 flex items-center justify-center"
+    class="min-h-screen bg-linear-to-br from-slate-900 via-slate-800 to-slate-900 p-4 md:p-6 flex items-center justify-center"
   >
-    <div class="max-w-3xl w-full space-y-6">
+    <div class="w-full max-w-5xl space-y-6">
       <!-- Header -->
       <div class="text-white">
-        <h3 class="text-3xl font-semibold mb-1">Погода</h3>
-        <p class="text-gray-400 text-base">Прогноз погоды для тебя</p>
+        <h1 class="text-4xl md:text-5xl font-bold mb-2">Погода</h1>
+        <p class="text-slate-400 text-base md:text-lg">Прогноз погоды для тебя</p>
       </div>
 
-      <!-- Search Bar -->
-      <div class="flex gap-3 relative">
-        <input
-          v-model="searchCity"
-          type="text"
-          placeholder="Поиск города"
-          @keyup.enter="() => getWeather(selectedCity)"
-          class="flex-1 bg-white/5 border border-white/10 rounded-lg px-5 py-3 text-white text-base placeholder-gray-500 focus:outline-none focus:border-white/30 focus:bg-white/8 transition-all duration-200"
-        />
-        <button
-          @click="requestGeolocation"
-          :disabled="isLoading"
-          class="bg-white/5 border border-white/10 rounded-lg px-6 py-3 text-white hover:bg-white/10 hover:border-white/20 transition-all duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <svg
-            v-if="!isLoading"
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-            <circle cx="12" cy="10" r="3" />
-          </svg>
-          <svg
-            v-else
-            class="animate-spin"
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path
-              d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 2.2"
-            />
-          </svg>
-          GPS
-        </button>
-
-        <transition name="slide">
-          <div
-            v-if="isOpen && cityList.length !== 0"
-            class="absolute top-full left-0 right-0 mt-2 bg-white/10 border border-white/20 rounded-lg backdrop-blur-sm overflow-hidden z-10"
-          >
-            <button
-              v-for="(city, idx) of cityList"
-              :key="idx"
-              @click="selectCity(city)"
-              class="w-full text-left px-4 py-3 text-white hover:bg-white/10 transition-all duration-150 border-b border-white/5 last:border-0 flex items-center justify-between group"
-            >
-              <div class="flex flex-col">
-                <span class="font-medium">{{ city.name }}</span>
-                <span class="text-gray-400 text-sm">{{ city.country }}</span>
-              </div>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                class="text-gray-500 group-hover:text-white transition-colors"
-              >
-                <path d="M5 12h14M12 5l7 7-7 7" />
-              </svg>
-            </button>
-          </div>
-        </transition>
-      </div>
+      <search-bar
+        :city-list="cityList"
+        :get-weather="getWeather"
+        :is-loading="isLoading"
+        :is-open="isOpen"
+        :request-geolocation="requestGeolocation"
+        :search-city="searchCity"
+        :select-city="selectCity"
+        :selected-city="selectedCity"
+      />
 
       <weather-card
         :has-current-weather="hasCurrentWeather"
@@ -140,41 +72,69 @@ watch(weatherData, (value) => {
       />
 
       <hourly-forecast-card :hourly-forecast="hourlyForecast" />
+      <div
+        v-if="dailwyWeather && dailwyWeather.length"
+        class="bg-white/5 border border-white/10 rounded-2xl p-6 transition-all duration-300"
+      >
+        <h3 class="text-xl font-semibold text-white mb-4">Прогноз погоды на неделю</h3>
+
+        <div class="flex gap-4 overflow-x-auto pb-2 custom-scrollbar">
+          <div
+            v-for="(daily, idx) in dailwyWeather"
+            :key="idx"
+            class="min-w-28 bg-white/5 rounded-xl p-3 text-center border border-white/10"
+          >
+            <div class="text-gray-400 text-sm mb-2">{{ daily.date }}</div>
+
+            <div class="text-white text-xs font-medium mb-2">{{ daily.day }}</div>
+
+            <div class="space-y-1 mb-2">
+              <div class="flex justify-center items-center gap-2">
+                <span class="text-gray-400 text-xs">Макс:</span>
+                <span class="text-red-400 text-lg font-semibold">{{ daily.t_max }}°</span>
+              </div>
+              <div class="flex justify-center items-center gap-2">
+                <span class="text-gray-400 text-xs">Мин:</span>
+                <span class="text-blue-400 text-lg font-semibold">{{ daily.t_min }}°</span>
+              </div>
+            </div>
+
+            <div class="text-gray-400 text-xs">
+              {{ daily.weathercode !== undefined ? weatherCode(daily.weathercode) : '-' }}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
+.overflow-x-auto {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
 }
 
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
+.overflow-x-auto::-webkit-scrollbar {
+  height: 4px;
 }
 
-.scrollbar-custom {
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: rgba(100, 116, 139, 0.1);
+  border-radius: 10px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.3);
+  border-radius: 10px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.5);
+}
+
+.overflow-x-auto {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
-}
-
-.scrollbar-custom::-webkit-scrollbar {
-  height: 6px;
-}
-
-.scrollbar-custom::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
-}
-
-.scrollbar-custom::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 10px;
-}
-
-.scrollbar-custom::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+  scrollbar-color: rgba(100, 116, 139, 0.3) rgba(100, 116, 139, 0.1);
 }
 </style>

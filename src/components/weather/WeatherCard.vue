@@ -4,16 +4,13 @@
       v-if="props.hasCurrentWeather"
       class="bg-white/5 border border-white/10 rounded-2xl p-6 transition-all duration-300"
     >
-      <weather-header :city="props.selectedCity" :time="props.weatherData.current.time" />
+      <weather-header :city="props.selectedCity" :time="weather.current.time" />
 
-      <WeatherCurrent :weather="props.weatherData.current" />
+      <WeatherCurrent :weather="weather.current" />
 
       <div class="h-px bg-white/10 my-6"></div>
 
-      <WeatherStats
-        :daily="props.weatherData.daily"
-        :humidity="props.weatherData.current.relative_humidity_2m"
-      />
+      <WeatherStats :daily="weather.daily" :humidity="weather.current.relative_humidity_2m" />
     </div>
   </transition>
 </template>
@@ -23,14 +20,22 @@ import type { WeatherData } from '@/types/weather'
 import WeatherCurrent from './WeatherCurrent.vue'
 import WeatherHeader from './WeatherHeader.vue'
 import WeatherStats from './WeatherStats.vue'
+import { computed } from 'vue'
 const props = defineProps<{
   hasCurrentWeather: boolean
   selectedCity: {
     name: string
     country: string
   }
-  weatherData: WeatherData
+  weatherData: WeatherData | null
 }>()
+
+const weather = computed<WeatherData>(() => {
+  if (!props.weatherData) {
+    throw new Error('weatherData is null')
+  }
+  return props.weatherData
+})
 
 console.log('hasCurrentWeather', props.hasCurrentWeather)
 </script>

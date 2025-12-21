@@ -38,6 +38,6 @@ export interface Citylist {
 export interface HourlyForecast {
   time: string
   hour: string
-  temp: string
-  code: number
+  temp: number
+  code?: number
 }

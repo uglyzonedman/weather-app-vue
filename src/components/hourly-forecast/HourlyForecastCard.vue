@@ -2,7 +2,7 @@
   <div v-if="props.hourlyForecast.length" class="bg-white/5 border border-white/10 rounded-2xl p-6">
     <h3 class="text-xl font-semibold text-white mb-4">Почасовой прогноз</h3>
 
-    <div class="flex gap-4 overflow-x-auto pb-2 scrollbar-custom">
+    <div class="flex gap-4 overflow-x-auto pb-2 custom-scrollbar">
       <div
         v-for="(hour, idx) in props.hourlyForecast.slice(0, 24)"
         :key="idx"
@@ -26,3 +26,30 @@ import { weatherCode } from '@/utils/utils'
 
 const props = defineProps<{ hourlyForecast: HourlyForecast[] }>()
 </script>
+
+<style scoped>
+.custom-scrollbar::-webkit-scrollbar {
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  transition: background 0.3s ease;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Для Firefox */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
+}
+</style>

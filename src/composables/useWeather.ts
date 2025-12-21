@@ -1,5 +1,5 @@
 import { weatherService } from '@/services/weather.service'
-import type { Citylist, SelectedCity, WeatherData } from '@/types/weather'
+import type { Citylist, HourlyForecast, SelectedCity, WeatherData } from '@/types/weather'
 import { days, months } from '@/utils/utils'
 import axios from 'axios'
 import { computed, ref } from 'vue'
@@ -67,16 +67,16 @@ export const useWeather = () => {
     return array
   })
 
-  const hourlyForecast = computed(() => {
+  const hourlyForecast = computed<HourlyForecast[]>(() => {
     if (!weatherData.value?.hourly) return []
 
     const { time, temperature_2m, weathercode } = weatherData.value.hourly
 
-    return time.map((t: string, i: number) => ({
+    return time.map((t, i) => ({
       time: t,
-      hour: new Date(t).getHours().toString().padStart(2, '0'),
-      temp: temperature_2m.length !== 0 && temperature_2m[i] ? Math.round(temperature_2m[i]) : '',
-      code: weathercode[i],
+      hour: t.slice(11, 13), // ✅ string
+      temp: temperature_2m[i]!, // ✅ number
+      code: weathercode?.[i],
     }))
   })
 
