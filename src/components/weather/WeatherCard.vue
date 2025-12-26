@@ -1,0 +1,41 @@
+<template>
+  <transition name="fade ">
+    <div
+      v-if="props.hasCurrentWeather"
+      class="relative bg-white/5 border border-white/10 rounded-2xl p-6 transition-all duration-300"
+    >
+      <weather-header :city="props.selectedCity" :time="weather.current.time" />
+
+      <WeatherCurrent :weather="weather.current" />
+
+      <div class="h-px bg-white/10 my-6"></div>
+
+      <WeatherStats :daily="weather.daily" :humidity="weather.current.relative_humidity_2m" />
+    </div>
+  </transition>
+</template>
+
+<script setup lang="ts">
+import type { WeatherData } from '@/types/weather'
+import { computed } from 'vue'
+import WeatherCurrent from './WeatherCurrent.vue'
+import WeatherHeader from './WeatherHeader.vue'
+import WeatherStats from './WeatherStats.vue'
+const props = defineProps<{
+  hasCurrentWeather: boolean
+  selectedCity: {
+    name: string
+    country: string
+  }
+  weatherData: WeatherData | null
+}>()
+
+const weather = computed<WeatherData>(() => {
+  if (!props.weatherData) {
+    throw new Error('weatherData is null')
+  }
+  return props.weatherData
+})
+
+console.log('hasCurrentWeather', props.hasCurrentWeather)
+</script>
