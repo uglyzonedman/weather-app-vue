@@ -30,8 +30,8 @@ export const weatherService = {
     const response = await axios.get('https://geocoding-api.open-meteo.com/v1/search', {
       params: {
         name: query,
-        count: 5,
-        language: 'en',
+        count: 1,
+        language: 'ru',
       },
     })
 

@@ -1,12 +1,15 @@
 <template>
-  <div class="flex gap-3 relative">
+  <div class="flex gap-3 relative z-20">
+    <!-- Инпут поиска -->
     <input
-      v-model="props.searchCity"
+      :value="props.searchCity"
+      @input="updateSearchCity"
       type="text"
       placeholder="Поиск города"
-      @keyup.enter="() => props.getWeather(props.selectedCity)"
       class="flex-1 bg-white/5 border border-white/10 rounded-lg px-5 py-3 text-white text-base placeholder-gray-500 focus:outline-none focus:border-white/30 focus:bg-white/8 transition-all duration-200"
     />
+
+    <!-- Кнопка GPS -->
     <button
       @click="props.requestGeolocation"
       :disabled="props.isLoading"
@@ -45,15 +48,16 @@
       GPS
     </button>
 
+    <!-- Список городов -->
     <transition name="slide">
       <div
-        v-if="props.isOpen && props.cityList.length !== 0"
-        class="absolute top-full left-0 right-0 mt-2 bg-white/10 border border-white/20 rounded-lg backdrop-blur-sm overflow-hidden z-10"
+        v-if="localOpen && props.cityList.length !== 0"
+        class="absolute top-full left-0 right-0 mt-2 bg-white/10 border border-white/20 rounded-lg backdrop-blur-sm overflow-hidden z-50"
       >
         <button
           v-for="(city, idx) of props.cityList"
           :key="idx"
-          @click="props.selectCity(city)"
+          @click="handleSelectCity(city)"
           class="w-full text-left px-4 py-3 text-white hover:bg-white/10 transition-all duration-150 border-b border-white/5 last:border-0 flex items-center justify-between group"
         >
           <div class="flex flex-col">
@@ -79,6 +83,7 @@
 </template>
 
 <script lang="ts" setup>
+import { ref, watch } from 'vue'
 import type { Citylist, SelectedCity } from '../../types/weather'
 
 const props = defineProps<{
@@ -91,4 +96,39 @@ const props = defineProps<{
   cityList: Citylist[]
   selectCity: (city: Citylist) => Promise<void>
 }>()
+
+const emit = defineEmits<{
+  (e: 'update:searchCity', value: string): void
+}>()
+
+// Локальное состояние открытия списка
+const localOpen = ref(props.isOpen)
+
+// Следим за внешним пропсом isOpen
+watch(
+  () => props.isOpen,
+  (newVal) => {
+    localOpen.value = newVal
+  },
+)
+
+// Открыть dropdown при вводе текста
+const openDropdown = () => {
+  if (props.cityList.length) {
+    localOpen.value = true
+  }
+}
+
+// Обновление значения инпута
+const updateSearchCity = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  emit('update:searchCity', target.value)
+  openDropdown()
+}
+
+// Обработчик выбора города
+const handleSelectCity = async (city: Citylist) => {
+  await props.selectCity(city)
+  localOpen.value = false
+}
 </script>

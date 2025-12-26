@@ -1,8 +1,8 @@
 <template>
-  <transition name="fade">
+  <transition name="fade ">
     <div
       v-if="props.hasCurrentWeather"
-      class="bg-white/5 border border-white/10 rounded-2xl p-6 transition-all duration-300"
+      class="relative bg-white/5 border border-white/10 rounded-2xl p-6 transition-all duration-300"
     >
       <weather-header :city="props.selectedCity" :time="weather.current.time" />
 
@@ -17,10 +17,10 @@
 
 <script setup lang="ts">
 import type { WeatherData } from '@/types/weather'
+import { computed } from 'vue'
 import WeatherCurrent from './WeatherCurrent.vue'
 import WeatherHeader from './WeatherHeader.vue'
 import WeatherStats from './WeatherStats.vue'
-import { computed } from 'vue'
 const props = defineProps<{
   hasCurrentWeather: boolean
   selectedCity: {
